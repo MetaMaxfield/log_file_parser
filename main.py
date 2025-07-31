@@ -25,9 +25,18 @@ def get_command_line_options() -> argparse.Namespace:
     return args
 
 
+def read_files(files):
+    """Open all files one by one."""
+    for file in files:
+        with open(file, 'r') as _:
+            # parsing_file(opened_file)
+            pass
+
+
 def main():
     """Execute the script step by step."""
-    _ = get_command_line_options()
+    args = get_command_line_options()
+    read_files(args.file)
     pass
 
 
