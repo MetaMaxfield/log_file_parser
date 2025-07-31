@@ -1,6 +1,7 @@
 """Parse a file with logs."""
 
 import argparse
+import json
 
 AVERAGE_REPORT_NAME = 'average'
 
@@ -25,12 +26,20 @@ def get_command_line_options() -> argparse.Namespace:
     return args
 
 
+def parsing_file(opened_file):
+    """Extract data."""
+    line = opened_file.readline()
+    while line != '':
+        _ = json.loads(line)
+        # accounting_all_endpoint_requests(request_data)
+        line = opened_file.readline()
+
+
 def read_files(files):
     """Open all files one by one."""
     for file in files:
-        with open(file, 'r') as _:
-            # parsing_file(opened_file)
-            pass
+        with open(file, 'r') as opened_file:
+            parsing_file(opened_file)
 
 
 def main():
