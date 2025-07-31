@@ -18,6 +18,17 @@ class TestMainFunc:
         main.main()
         mock_get_command_line_options.assert_called_once()
 
+    @mock.patch('main.read_files')
+    def test_call_read_files(self, mock_read_files):
+        """Test call read_files(files)."""
+        test_files = ['example3.log', 'example4.log']
+
+        with mock.patch('main.get_command_line_options') as mock_get_command_line_options:
+            mock_get_command_line_options.return_value = mock.Mock(file=test_files, report=main.AVERAGE_REPORT_NAME)
+            main.main()
+
+        mock_read_files.assert_called_once_with(test_files)
+
 
 class TestGetCommandLineOptions:
     """Tests get_command_line_options()."""
