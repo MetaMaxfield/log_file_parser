@@ -3,6 +3,9 @@
 import argparse
 import json
 
+from endpoint_stats import EndpointStats
+
+ALL_ENDPOINT_REQUESTS = {}
 AVERAGE_REPORT_NAME = 'average'
 
 
@@ -26,12 +29,28 @@ def get_command_line_options() -> argparse.Namespace:
     return args
 
 
+def accounting_endpoint_request(request_data):
+    """
+    Add/create endpoint info in ALL_ENDPOINT_REQUESTS.
+
+    Structure ALL_ENDPOINT_REQUESTS:
+    key - endpoint name
+    value - EndpointStats object
+    """
+    if not request_data['url'] in ALL_ENDPOINT_REQUESTS:
+        endpoint_stats_class = EndpointStats(request_data['url'])
+        ALL_ENDPOINT_REQUESTS[endpoint_stats_class.url] = endpoint_stats_class
+
+    ALL_ENDPOINT_REQUESTS[request_data['url']].add_request()
+    ALL_ENDPOINT_REQUESTS[request_data['url']].add_response_time(request_data['response_time'])
+
+
 def parsing_file(opened_file):
     """Extract data."""
     line = opened_file.readline()
     while line != '':
-        _ = json.loads(line)
-        # accounting_all_endpoint_requests(request_data)
+        request_data = json.loads(line)
+        accounting_endpoint_request(request_data)
         line = opened_file.readline()
 
 
