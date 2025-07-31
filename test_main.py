@@ -65,3 +65,19 @@ class TestGetCommandLineOptions:
         assert isinstance(args, Namespace) is True
         assert args.file == expected_files
         assert args.report == expected_report
+
+
+class TestReadFiles:
+    """Tests read_files(files)."""
+
+    @mock.patch('main.parsing_file')
+    def test_call_parsing_file(self, mock_parsing_file):
+        """Test call parsing_file(opened_file)."""
+        with mock.patch('main.open', new_callable=mock.mock_open) as mock_open:  # Use mock.mock_open!
+            main.read_files(
+                [
+                    'test_file.log',
+                ]
+            )
+
+        mock_parsing_file.assert_called_once_with(mock_open.return_value)
