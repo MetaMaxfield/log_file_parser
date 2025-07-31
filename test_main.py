@@ -9,6 +9,14 @@ import pytest
 import main
 
 
+class TestGlobalValues:
+    """Tests global values."""
+
+    def test_name_average_report_name(self):
+        """Test name AVERAGE_REPORT_NAME."""
+        assert main.AVERAGE_REPORT_NAME == 'average'
+
+
 class TestMainFunc:
     """Tests main()."""
 
