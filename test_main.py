@@ -10,6 +10,12 @@ import main
 from endpoint_stats import EndpointStats
 
 
+@pytest.fixture(autouse=True)
+def autoclear_all_endpoint_requests():
+    """Autoclear ALL_ENDPOINT_REQUESTS between tests."""
+    main.ALL_ENDPOINT_REQUESTS.clear()
+
+
 class TestGlobalValues:
     """Tests global values."""
 
