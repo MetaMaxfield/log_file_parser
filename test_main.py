@@ -1,13 +1,15 @@
 """Module with tests."""
 
+import re
 import sys
 from argparse import Namespace
 from unittest import mock
 
 import pytest
+from tabulate import tabulate
 
 import main
-from config import AVERAGE_REPORT_NAME
+from config import AVERAGE_HEADERS, AVERAGE_REPORT_NAME
 from endpoint_stats import EndpointStats
 
 
@@ -154,3 +156,40 @@ class TestAccountingEndpointRequest:
             assert value.total_response_time == expected_all_endpoint_requests[key]['total_response_time']
             # Check true EndpointStats(key).total_requests.
             assert value.total_requests == expected_all_endpoint_requests[key]['total_requests']
+
+
+class TestCreateTable:
+    """Tests create_table(type_report)."""
+
+    @mock.patch('main.generate_average_format_for_table', side_effect=SystemExit)
+    def test_call_generate_average_format_for_table(self, mock_generate_average_format_for_table):
+        """Test call generate_average_format_for_table() for type_report=AVERAGE_REPORT_NAME."""
+        with pytest.raises(SystemExit):  # Stop run after call create_table(type_report).
+            _ = main.create_table(AVERAGE_REPORT_NAME)
+        mock_generate_average_format_for_table.assert_called_once()
+
+    def test_raise(self):
+        """Test call exception due to unknown type report."""
+        unknown_type_report = 'UNKNOWN_TYPE_REPORT'
+        with pytest.raises(
+            Exception,
+            match=re.escape(  # match uses regex (use re.escape).
+                f'No action specified for parameter "--report {unknown_type_report}" in "create_table(type_report)".'
+            ),
+        ):
+            _ = main.create_table(unknown_type_report)
+
+    @mock.patch('main.generate_average_format_for_table')
+    def test_return_value_for_average_type(self, mock_generate_average_format_for_table):
+        """Test return value for type_report=AVERAGE_REPORT_NAME."""
+        # Create ident return value from generate_average_format_for_table()
+        # Count values == len(AVERAGE_HEADERS)
+        test_return_value = []
+        test_return_value.append([f'random_value{i}' for i in range(len(AVERAGE_HEADERS))])
+
+        mock_generate_average_format_for_table.return_value = test_return_value
+
+        fact_table = main.create_table(AVERAGE_REPORT_NAME)
+        expected_table = tabulate(test_return_value, headers=AVERAGE_HEADERS, showindex='always')
+
+        assert fact_table == expected_table
