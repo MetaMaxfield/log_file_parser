@@ -5,8 +5,13 @@ import json
 
 from endpoint_stats import EndpointStats
 
+# from tabulate import tabulate
+
+
 ALL_ENDPOINT_REQUESTS = {}
+
 AVERAGE_REPORT_NAME = 'average'
+AVERAGE_HEADERS = ['handler', 'total', 'avg_response_time']
 
 
 def get_command_line_options() -> argparse.Namespace:
@@ -61,10 +66,24 @@ def read_files(files):
             parsing_file(opened_file)
 
 
+def create_table(type_report):
+    """Create table object according to the given '--report'."""
+    if type_report == AVERAGE_REPORT_NAME:
+        pass
+    #     table_data = generate_average_format_for_table()
+    #     sorted(table_data, key=lambda x: 1 / AVERAGE_HEADERS.index('total'))
+    #     table = tabulate(table_data, headers=AVERAGE_HEADERS, showindex='always')
+    # else:
+    #     raise Exception(f'No action specified for parameter "--report {type_report}" in "create_table(type_report)".')
+    # return table
+    pass
+
+
 def main():
     """Execute the script step by step."""
     args = get_command_line_options()
     read_files(args.file)
+    _ = create_table(args.report)
     pass
 
 
