@@ -3,15 +3,14 @@
 import argparse
 import json
 
+from tabulate import tabulate
+
 from endpoint_stats import EndpointStats
-
-# from tabulate import tabulate
-
 
 ALL_ENDPOINT_REQUESTS = {}
 
 AVERAGE_REPORT_NAME = 'average'
-AVERAGE_HEADERS = ['handler', 'total', 'avg_response_time']
+AVERAGE_HEADERS = ['handler', 'total', 'avg_response_time']  # Also defines a subsequence.
 
 
 def get_command_line_options() -> argparse.Namespace:
@@ -66,17 +65,26 @@ def read_files(files):
             parsing_file(opened_file)
 
 
+def generate_average_format_for_table():
+    """
+    Generate data format: [(...), (...)].
+
+    Determine subsequence in AVERAGE_HEADERS.
+    Order by '-total'.
+    """
+    table_data = [value.get_correct_format_for_tabulate() for value in ALL_ENDPOINT_REQUESTS.values()]
+    table_data.sort(key=lambda x: 1 / x[AVERAGE_HEADERS.index('total')])
+    return table_data
+
+
 def create_table(type_report):
     """Create table object according to the given '--report'."""
     if type_report == AVERAGE_REPORT_NAME:
-        pass
-    #     table_data = generate_average_format_for_table()
-    #     sorted(table_data, key=lambda x: 1 / AVERAGE_HEADERS.index('total'))
-    #     table = tabulate(table_data, headers=AVERAGE_HEADERS, showindex='always')
-    # else:
-    #     raise Exception(f'No action specified for parameter "--report {type_report}" in "create_table(type_report)".')
-    # return table
-    pass
+        table_data = generate_average_format_for_table()
+        table = tabulate(table_data, headers=AVERAGE_HEADERS, showindex='always')
+    else:
+        raise Exception(f'No action specified for parameter "--report {type_report}" in "create_table(type_report)".')
+    return table
 
 
 def main():
