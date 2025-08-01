@@ -2,6 +2,7 @@
 
 import pytest
 
+from config import AVERAGE_HEADERS, AVG_RESPONSE_TIME_COLUMN_NAME, REQUESTS_TOTAL_COLUMN_NAME, URL_COLUMN_NAME
 from endpoint_stats import EndpointStats
 
 
@@ -38,11 +39,15 @@ class TestEndpointStats:
             endpoint_stats_object.add_response_time(fake_time)
             endpoint_stats_object.add_request()
 
-        assert endpoint_stats_object.get_correct_format_for_tabulate() == (
-            endpoint_stats_object.url,
-            endpoint_stats_object.total_requests,
-            endpoint_stats_object.get_avg_response_time(),
-        )
+        for i, data_element in enumerate(endpoint_stats_object.get_correct_format_for_tabulate()):
+            if AVERAGE_HEADERS[i] == URL_COLUMN_NAME:
+                assert data_element == endpoint_stats_object.url
+            elif AVERAGE_HEADERS[i] == REQUESTS_TOTAL_COLUMN_NAME:
+                assert data_element == endpoint_stats_object.total_requests
+            elif AVERAGE_HEADERS[i] == AVG_RESPONSE_TIME_COLUMN_NAME:
+                assert data_element == endpoint_stats_object.get_avg_response_time()
+            else:
+                raise Exception('Change test!')
 
     def test_add_request(self, endpoint_stats_object):
         """Test add_request() working."""
