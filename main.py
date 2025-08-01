@@ -91,8 +91,8 @@ def main():
     """Execute the script step by step."""
     args = get_command_line_options()
     read_files(args.file)
-    _ = create_table(args.report)
-    pass
+    table = create_table(args.report)
+    print(table)
 
 
 if __name__ == '__main__':
