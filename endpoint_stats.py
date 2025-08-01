@@ -1,5 +1,7 @@
 """Module with EndpointStats."""
 
+from config import AVERAGE_HEADERS, AVG_RESPONSE_TIME_COLUMN_NAME, REQUESTS_TOTAL_COLUMN_NAME, URL_COLUMN_NAME
+
 
 class EndpointStats:
     """Collecting statistics for a single endpoint."""
@@ -21,9 +23,22 @@ class EndpointStats:
         avg_response_time = self.total_response_time / self.total_requests
         return round(avg_response_time, 3)
 
-    def get_correct_format_for_tabulate(self) -> tuple[str, int, float]:
+    def get_correct_format_for_tabulate(self) -> list[str | int | float]:
         """Return the correct format with data for use in forming a table."""
-        return self.url, self.total_requests, self.get_avg_response_time()
+        endpoint_data: list[str | int | float] = []
+
+        for column in AVERAGE_HEADERS:  # Defines a subsequence.
+            if column == URL_COLUMN_NAME:
+                endpoint_data.append(self.url)
+            elif column == REQUESTS_TOTAL_COLUMN_NAME:
+                endpoint_data.append(self.total_requests)
+            elif column == AVG_RESPONSE_TIME_COLUMN_NAME:
+                endpoint_data.append(self.get_avg_response_time())
+
+            else:
+                raise Exception('Unknown column in AVERAGE_HEADERS. Add new functionality to EndpointStats.')
+
+        return endpoint_data
 
     def add_request(self) -> None:
         """Add new request."""
