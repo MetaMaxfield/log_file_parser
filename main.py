@@ -5,12 +5,10 @@ import json
 
 from tabulate import tabulate
 
+from config import AVERAGE_HEADERS, AVERAGE_REPORT_NAME, REQUESTS_TOTAL_COLUMN_NAME
 from endpoint_stats import EndpointStats
 
 ALL_ENDPOINT_REQUESTS = {}
-
-AVERAGE_REPORT_NAME = 'average'
-AVERAGE_HEADERS = ['handler', 'total', 'avg_response_time']  # Also defines a subsequence.
 
 
 def get_command_line_options() -> argparse.Namespace:
@@ -73,7 +71,7 @@ def generate_average_format_for_table():
     Order by '-total'.
     """
     table_data = [value.get_correct_format_for_tabulate() for value in ALL_ENDPOINT_REQUESTS.values()]
-    table_data.sort(key=lambda x: 1 / x[AVERAGE_HEADERS.index('total')])
+    table_data.sort(key=lambda x: 1 / x[AVERAGE_HEADERS.index(REQUESTS_TOTAL_COLUMN_NAME)])
     return table_data
 
 

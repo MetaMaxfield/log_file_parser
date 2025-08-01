@@ -1,0 +1,10 @@
+"""Script configuration."""
+
+AVERAGE_REPORT_NAME = 'average'
+
+URL_COLUMN_NAME = 'handler'
+REQUESTS_TOTAL_COLUMN_NAME = 'total'
+AVG_RESPONSE_TIME_COLUMN_NAME = 'avg_response_time'
+
+# Also defines a subsequence.
+AVERAGE_HEADERS = [URL_COLUMN_NAME, REQUESTS_TOTAL_COLUMN_NAME, AVG_RESPONSE_TIME_COLUMN_NAME]

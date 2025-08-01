@@ -7,6 +7,7 @@ from unittest import mock
 import pytest
 
 import main
+from config import AVERAGE_REPORT_NAME
 from endpoint_stats import EndpointStats
 
 
@@ -21,7 +22,7 @@ class TestGlobalValues:
 
     def test_name_average_report_name(self):
         """Test name AVERAGE_REPORT_NAME."""
-        assert main.AVERAGE_REPORT_NAME == 'average'
+        assert AVERAGE_REPORT_NAME == 'average'
 
     def test_value_all_endpoint_requests(self):
         """Test value ALL_ENDPOINT_REQUESTS."""
@@ -45,7 +46,7 @@ class TestMainFunc:
         test_files = ['example3.log', 'example4.log']
 
         with mock.patch('main.get_command_line_options') as mock_get_command_line_options:
-            mock_get_command_line_options.return_value = mock.Mock(file=test_files, report=main.AVERAGE_REPORT_NAME)
+            mock_get_command_line_options.return_value = mock.Mock(file=test_files, report=AVERAGE_REPORT_NAME)
             main.main()
 
         mock_read_files.assert_called_once_with(test_files)
