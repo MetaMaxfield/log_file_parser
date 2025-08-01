@@ -7,6 +7,7 @@ from unittest import mock
 import pytest
 
 import main
+from endpoint_stats import EndpointStats
 
 
 class TestGlobalValues:
@@ -81,3 +82,62 @@ class TestReadFiles:
             )
 
         mock_parsing_file.assert_called_once_with(mock_open.return_value)
+
+
+class TestAccountingEndpointRequest:
+    """Tests accounting_endpoint_request(request_data)."""
+
+    def test_working(self):
+        """Test working."""
+        test_request_data = (
+            {
+                "@timestamp": "2025-06-22T13:57:32+00:00",
+                "status": 200,
+                "url": "/api/context/...",
+                "request_method": "GET",
+                "response_time": 0.024,
+                "http_user_agent": "...",
+            },
+            {
+                "@timestamp": "2025-06-22T13:57:32+00:00",
+                "status": 200,
+                "url": "/api/context/...",
+                "request_method": "GET",
+                "response_time": 0.02,
+                "http_user_agent": "...",
+            },
+            {
+                "@timestamp": "2025-06-22T13:57:32+00:00",
+                "status": 200,
+                "url": "/api/homeworks/...",
+                "request_method": "GET",
+                "response_time": 0.024,
+                "http_user_agent": "...",
+            },
+            {
+                "@timestamp": "2025-06-22T13:57:34+00:00",
+                "status": 200,
+                "url": "/api/specializations/...",
+                "request_method": "GET",
+                "response_time": 0.04,
+                "http_user_agent": "...",
+            },
+        )
+        expected_all_endpoint_requests = {  # From test_request_data.
+            '/api/context/...': {'total_response_time': 0.044, 'total_requests': 2},
+            '/api/homeworks/...': {'total_response_time': 0.024, 'total_requests': 1},
+            '/api/specializations/...': {'total_response_time': 0.04, 'total_requests': 1},
+        }
+
+        for data in test_request_data:  # Add data from file.
+            main.accounting_endpoint_request(data)
+
+        for key, value in main.ALL_ENDPOINT_REQUESTS.items():
+            # Check true key (url).
+            assert key in expected_all_endpoint_requests
+            # Check true value class object.
+            assert isinstance(value, EndpointStats) is True
+            # Check true EndpointStats(key).total_response_time.
+            assert value.total_response_time == expected_all_endpoint_requests[key]['total_response_time']
+            # Check true EndpointStats(key).total_requests.
+            assert value.total_requests == expected_all_endpoint_requests[key]['total_requests']
