@@ -17,6 +17,10 @@ class TestGlobalValues:
         """Test name AVERAGE_REPORT_NAME."""
         assert main.AVERAGE_REPORT_NAME == 'average'
 
+    def test_value_all_endpoint_requests(self):
+        """Test value ALL_ENDPOINT_REQUESTS."""
+        assert main.ALL_ENDPOINT_REQUESTS == {}
+
 
 class TestMainFunc:
     """Tests main()."""
