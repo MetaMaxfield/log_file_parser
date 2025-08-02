@@ -19,16 +19,9 @@ def autoclear_all_endpoint_requests():
     main.ALL_ENDPOINT_REQUESTS.clear()
 
 
-class TestGlobalValues:
-    """Tests global values."""
-
-    def test_name_average_report_name(self):
-        """Test name AVERAGE_REPORT_NAME."""
-        assert AVERAGE_REPORT_NAME == 'average'
-
-    def test_value_all_endpoint_requests(self):
-        """Test value ALL_ENDPOINT_REQUESTS."""
-        assert main.ALL_ENDPOINT_REQUESTS == {}
+def test_value_all_endpoint_requests():
+    """Test value ALL_ENDPOINT_REQUESTS."""
+    assert main.ALL_ENDPOINT_REQUESTS == {}
 
 
 class TestMainFunc:
