@@ -53,6 +53,14 @@ class TestMainFunc:
 
         mock_read_files.assert_called_once_with(test_files)
 
+    @mock.patch('main.read_files', return_value=None)
+    @mock.patch('main.get_command_line_options', return_value=mock.Mock(file=['testfile1.log'], report='test_report'))
+    def test_call_create_table(self, *args):
+        """Test call create_table(type_report)."""
+        with mock.patch('main.create_table') as mock_create_table:
+            main.main()
+            mock_create_table.assert_called_once_with('test_report')
+
 
 class TestGetCommandLineOptions:
     """Tests get_command_line_options()."""
