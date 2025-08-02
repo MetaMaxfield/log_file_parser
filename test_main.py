@@ -9,7 +9,7 @@ import pytest
 from tabulate import tabulate
 
 import main
-from config import AVERAGE_HEADERS, AVERAGE_REPORT_NAME
+from config import AVERAGE_HEADERS, AVERAGE_REPORT_NAME, REQUESTS_TOTAL_COLUMN_NAME
 from endpoint_stats import EndpointStats
 
 
@@ -193,3 +193,42 @@ class TestCreateTable:
         expected_table = tabulate(test_return_value, headers=AVERAGE_HEADERS, showindex='always')
 
         assert fact_table == expected_table
+
+
+class TestGenerateAverageFormatForTable:
+    """Tests generate_average_format_for_table()."""
+
+    def test_return_value(self):
+        """Test return value."""
+        # Create objects for ALL_ENDPOINT_REQUESTS.
+        # Create endpoint_stats1
+        endpoint_stats1 = EndpointStats('/path/1/...')
+        endpoint_stats1.total_response_time = 1.5
+        endpoint_stats1.total_requests = 3
+        # Create endpoint_stats2
+        endpoint_stats2 = EndpointStats('/path/2/...')
+        endpoint_stats2.total_response_time = 2
+        endpoint_stats2.total_requests = 2
+        # Create endpoint_stats3
+        endpoint_stats3 = EndpointStats('/path/3/...')
+        endpoint_stats3.total_response_time = 0.3
+        endpoint_stats3.total_requests = 1
+
+        # Create ALL_ENDPOINT_REQUESTS.
+        main.ALL_ENDPOINT_REQUESTS[endpoint_stats1.url] = endpoint_stats1
+        main.ALL_ENDPOINT_REQUESTS[endpoint_stats2.url] = endpoint_stats2
+        main.ALL_ENDPOINT_REQUESTS[endpoint_stats3.url] = endpoint_stats3
+
+        # Run generate_average_format_for_table()
+        fact_table_data = main.generate_average_format_for_table()
+
+        # Check "fact_table_data == expected_table_data"
+        expected_table_data = sorted(
+            [
+                endpoint_stats1.get_correct_format_for_tabulate(),
+                endpoint_stats2.get_correct_format_for_tabulate(),
+                endpoint_stats3.get_correct_format_for_tabulate(),
+            ],
+            key=lambda x: 1 / x[AVERAGE_HEADERS.index(REQUESTS_TOTAL_COLUMN_NAME)],
+        )
+        assert fact_table_data == expected_table_data
