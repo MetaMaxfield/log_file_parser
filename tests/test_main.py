@@ -7,6 +7,7 @@ import runpy
 import sys
 from argparse import Namespace
 from pathlib import Path
+from typing import Any
 from unittest import mock
 
 import main
@@ -330,28 +331,36 @@ class TestRunFile:
 
         os.remove(new_file)
 
+    def create_expected_tabulate_data(
+        self, data_for_create_endpoint_classes: list[dict[str, Any]]
+    ) -> list[list[str | int | float]]:
+        """
+        Create expect tabulate data depending on get 'data_for_create_endpoint_classes'.
+
+        Use in expected_table_file1() and expected_table_file1_file2() fixtures.
+        """
+        expected_tabulate_data = []
+        for endpoint_data in data_for_create_endpoint_classes:
+            endpoint_class = EndpointStats(endpoint_data['url'])
+            endpoint_class.total_response_time = endpoint_data['total_response_time']
+            endpoint_class.total_requests = endpoint_data['total_requests']
+
+            expected_tabulate_data.append(endpoint_class.get_correct_format_for_tabulate())
+
+        expected_tabulate_data.sort(
+            key=lambda x: 1 / int(x[AVERAGE_HEADERS.index(REQUESTS_TOTAL_COLUMN_NAME)])  # int() for mypy.
+        )
+        return expected_tabulate_data
+
     @pytest.fixture(autouse=False)
     def expected_table_file1(self):
         """Expect table for one file (data from TestRunFile.test_request_data)."""
-        # Create endpoint_stats1
-        endpoint_stats1 = EndpointStats('/api/context/...')
-        endpoint_stats1.total_response_time = 0.044
-        endpoint_stats1.total_requests = 2
-        # Create endpoint_stats2
-        endpoint_stats2 = EndpointStats('/api/homeworks/...')
-        endpoint_stats2.total_response_time = 0.024
-        endpoint_stats2.total_requests = 1
-        # Create endpoint_stats3
-        endpoint_stats3 = EndpointStats('/api/specializations/...')
-        endpoint_stats3.total_response_time = 0.04
-        endpoint_stats3.total_requests = 1
-
-        expected_tabulate_data = [
-            endpoint_stats1.get_correct_format_for_tabulate(),
-            endpoint_stats2.get_correct_format_for_tabulate(),
-            endpoint_stats3.get_correct_format_for_tabulate(),
+        data_for_create_endpoint_classes = [
+            {'url': '/api/context/...', 'total_response_time': 0.044, 'total_requests': 2},
+            {'url': '/api/homeworks/...', 'total_response_time': 0.024, 'total_requests': 1},
+            {'url': '/api/specializations/...', 'total_response_time': 0.04, 'total_requests': 1},
         ]
-        expected_tabulate_data.sort(key=lambda x: 1 / x[AVERAGE_HEADERS.index(REQUESTS_TOTAL_COLUMN_NAME)])
+        expected_tabulate_data = self.create_expected_tabulate_data(data_for_create_endpoint_classes)
         expected_table = tabulate(expected_tabulate_data, headers=AVERAGE_HEADERS, showindex='always')
         return expected_table
 
@@ -360,27 +369,14 @@ class TestRunFile:
         """
         Expect table for two files (data from TestRunFile.test_request_data).
 
-        Data values is double because files have a equal data.
+        Data values is double (check 'expected_table_file1()') because files have a equal data.
         """
-        # Create endpoint_stats1
-        endpoint_stats1 = EndpointStats('/api/context/...')
-        endpoint_stats1.total_response_time = 0.088
-        endpoint_stats1.total_requests = 4
-        # Create endpoint_stats2
-        endpoint_stats2 = EndpointStats('/api/homeworks/...')
-        endpoint_stats2.total_response_time = 0.048
-        endpoint_stats2.total_requests = 2
-        # Create endpoint_stats3
-        endpoint_stats3 = EndpointStats('/api/specializations/...')
-        endpoint_stats3.total_response_time = 0.08
-        endpoint_stats3.total_requests = 2
-
-        expected_tabulate_data = [
-            endpoint_stats1.get_correct_format_for_tabulate(),
-            endpoint_stats2.get_correct_format_for_tabulate(),
-            endpoint_stats3.get_correct_format_for_tabulate(),
+        data_for_create_endpoint_classes = [
+            {'url': '/api/context/...', 'total_response_time': 0.088, 'total_requests': 4},
+            {'url': '/api/homeworks/...', 'total_response_time': 0.048, 'total_requests': 2},
+            {'url': '/api/specializations/...', 'total_response_time': 0.08, 'total_requests': 2},
         ]
-        expected_tabulate_data.sort(key=lambda x: 1 / x[AVERAGE_HEADERS.index(REQUESTS_TOTAL_COLUMN_NAME)])
+        expected_tabulate_data = self.create_expected_tabulate_data(data_for_create_endpoint_classes)
         expected_table = tabulate(expected_tabulate_data, headers=AVERAGE_HEADERS, showindex='always')
         return expected_table
 
