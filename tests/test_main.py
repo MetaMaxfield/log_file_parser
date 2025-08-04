@@ -351,6 +351,7 @@ class TestRunFile:
             endpoint_stats2.get_correct_format_for_tabulate(),
             endpoint_stats3.get_correct_format_for_tabulate(),
         ]
+        expected_tabulate_data.sort(key=lambda x: 1 / x[AVERAGE_HEADERS.index(REQUESTS_TOTAL_COLUMN_NAME)])
         expected_table = tabulate(expected_tabulate_data, headers=AVERAGE_HEADERS, showindex='always')
         return expected_table
 
@@ -379,6 +380,7 @@ class TestRunFile:
             endpoint_stats2.get_correct_format_for_tabulate(),
             endpoint_stats3.get_correct_format_for_tabulate(),
         ]
+        expected_tabulate_data.sort(key=lambda x: 1 / x[AVERAGE_HEADERS.index(REQUESTS_TOTAL_COLUMN_NAME)])
         expected_table = tabulate(expected_tabulate_data, headers=AVERAGE_HEADERS, showindex='always')
         return expected_table
 
