@@ -3,3 +3,4 @@ __pycache__
 .vscode
 example1.log
 example2.log
+.coverage
