@@ -9,12 +9,11 @@ from argparse import Namespace
 from pathlib import Path
 from unittest import mock
 
-import pytest
-from tabulate import tabulate
-
 import main
+import pytest
 from config import AVERAGE_HEADERS, AVERAGE_REPORT_NAME, REQUESTS_TOTAL_COLUMN_NAME
 from endpoint_stats import EndpointStats
+from tabulate import tabulate
 
 
 @pytest.fixture(autouse=True)
@@ -286,20 +285,57 @@ class TestRunFile:
         },
     )
 
-    def test_run_parser_1(self, monkeypatch):
+    @pytest.fixture(autouse=False)
+    def new_local_file1(self):
+        """Create new file 'testfile1.log' in local directory and delete this file after test."""
+        current_dir = Path(__file__).parent.parent
+        log_file_name = 'testfile1.log'
+        new_file = current_dir / log_file_name
+        with open(new_file, 'w') as file:  # Write in file data from TestRunFile.test_request_data.
+            for data in TestRunFile.test_request_data:
+                json.dump(data, file)
+                file.write('\n')
+
+        yield log_file_name
+
+        os.remove(new_file)
+
+    @pytest.fixture(autouse=False)
+    def new_local_file2(self):
+        """Create new file 'testfile2.log' in local directory and delete this file after test."""
+        current_dir = Path(__file__).parent.parent
+        log_file_name = 'testfile2.log'
+        new_file = current_dir / log_file_name
+        with open(new_file, 'w') as file:  # Write in file data from TestRunFile.test_request_data.
+            for data in TestRunFile.test_request_data:
+                json.dump(data, file)
+                file.write('\n')
+
+        yield log_file_name
+
+        os.remove(new_file)
+
+    @pytest.fixture(autouse=False)
+    def new_home_file1(self):
+        """Create new file 'testfile1.log' in home directory and delete this file after test."""
+        home_dir = Path().home()
+        log_file_name = 'testfile1.log'
+        new_file = home_dir / log_file_name
+        with open(new_file, 'w') as file:  # Write in file data from TestRunFile.test_request_data.
+            for data in TestRunFile.test_request_data:
+                json.dump(data, file)
+                file.write('\n')
+
+        yield str(new_file)
+
+        os.remove(new_file)
+
+    def test_run_parser_1(self, new_local_file1, monkeypatch):
         """
         Run 'python main.py --file testfile1.log'.
 
         File in local directory, default report (average).
         """
-        current_dir = Path(__file__).parent.parent
-        log_file_name1 = 'testfile1.log'
-        new_file = current_dir / log_file_name1
-        with open(new_file, 'w') as file:
-            for data in TestRunFile.test_request_data:
-                json.dump(data, file)
-                file.write('\n')
-
         # Create endpoint_stats1
         endpoint_stats1 = EndpointStats('/api/context/...')
         endpoint_stats1.total_response_time = 0.044
@@ -320,28 +356,18 @@ class TestRunFile:
         ]
         expected_tabulate = tabulate(expected_tabulate_data, headers=AVERAGE_HEADERS, showindex='always')
 
-        monkeypatch.setattr(sys, 'argv', ['main.py', '--file', log_file_name1])
+        monkeypatch.setattr(sys, 'argv', ['main.py', '--file', new_local_file1])
         with mock.patch('builtins.print') as mock_print:
             runpy.run_path("main.py", run_name="__main__")
 
         mock_print.assert_called_once_with(expected_tabulate)
 
-        os.remove(new_file)
-
-    def test_run_parser_2(self, monkeypatch):
+    def test_run_parser_2(self, new_local_file1, monkeypatch):
         """
         Run 'python main.py --file testfile1.log --report average'.
 
         File in local directory, report is 'average'.
         """
-        current_dir = Path(__file__).parent.parent
-        log_file_name1 = 'testfile1.log'
-        new_file = current_dir / log_file_name1
-        with open(new_file, 'w') as file:
-            for data in TestRunFile.test_request_data:
-                json.dump(data, file)
-                file.write('\n')
-
         # Create endpoint_stats1
         endpoint_stats1 = EndpointStats('/api/context/...')
         endpoint_stats1.total_response_time = 0.044
@@ -362,35 +388,18 @@ class TestRunFile:
         ]
         expected_tabulate = tabulate(expected_tabulate_data, headers=AVERAGE_HEADERS, showindex='always')
 
-        monkeypatch.setattr(sys, 'argv', ['main.py', '--file', log_file_name1])
+        monkeypatch.setattr(sys, 'argv', ['main.py', '--file', new_local_file1])
         with mock.patch('builtins.print') as mock_print:
             runpy.run_path("main.py", run_name="__main__")
 
         mock_print.assert_called_once_with(expected_tabulate)
 
-        os.remove(new_file)
-
-    def test_run_parser_3(self, monkeypatch):
+    def test_run_parser_3(self, new_local_file1, new_local_file2, monkeypatch):
         """
         Run 'python main.py --file testfile1.log testfile2.log'.
 
         Two files in local directory, default report.
         """
-        current_dir = Path(__file__).parent.parent
-        log_file_name1 = 'testfile1.log'
-        new_file1 = current_dir / log_file_name1
-        with open(new_file1, 'w') as file:
-            for data in TestRunFile.test_request_data:
-                json.dump(data, file)
-                file.write('\n')
-
-        log_file_name2 = 'testfile2.log'
-        new_file2 = current_dir / log_file_name2
-        with open(new_file2, 'w') as file:
-            for data in TestRunFile.test_request_data:
-                json.dump(data, file)
-                file.write('\n')
-
         # Create endpoint_stats1
         endpoint_stats1 = EndpointStats('/api/context/...')
         endpoint_stats1.total_response_time = 0.088
@@ -411,36 +420,18 @@ class TestRunFile:
         ]
         expected_tabulate = tabulate(expected_tabulate_data, headers=AVERAGE_HEADERS, showindex='always')
 
-        monkeypatch.setattr(sys, 'argv', ['main.py', '--file', log_file_name1, log_file_name2])
+        monkeypatch.setattr(sys, 'argv', ['main.py', '--file', new_local_file1, new_local_file2])
         with mock.patch('builtins.print') as mock_print:
             runpy.run_path("main.py", run_name="__main__")
 
         mock_print.assert_called_once_with(expected_tabulate)
 
-        os.remove(new_file1)
-        os.remove(new_file2)
-
-    def test_run_parser_4(self, monkeypatch):
+    def test_run_parser_4(self, new_local_file1, new_local_file2, monkeypatch):
         """
         Run 'python main.py --file testfile1.log testfile2.log --report average'.
 
         Two files in local directory, report is 'average'.
         """
-        current_dir = Path(__file__).parent.parent
-        log_file_name1 = 'testfile1.log'
-        new_file1 = current_dir / log_file_name1
-        with open(new_file1, 'w') as file:
-            for data in TestRunFile.test_request_data:
-                json.dump(data, file)
-                file.write('\n')
-
-        log_file_name2 = 'testfile2.log'
-        new_file2 = current_dir / log_file_name2
-        with open(new_file2, 'w') as file:
-            for data in TestRunFile.test_request_data:
-                json.dump(data, file)
-                file.write('\n')
-
         # Create endpoint_stats1
         endpoint_stats1 = EndpointStats('/api/context/...')
         endpoint_stats1.total_response_time = 0.088
@@ -461,30 +452,18 @@ class TestRunFile:
         ]
         expected_tabulate = tabulate(expected_tabulate_data, headers=AVERAGE_HEADERS, showindex='always')
 
-        monkeypatch.setattr(sys, 'argv', ['main.py', '--file', log_file_name1, log_file_name2])
+        monkeypatch.setattr(sys, 'argv', ['main.py', '--file', new_local_file1, new_local_file2])
         with mock.patch('builtins.print') as mock_print:
             runpy.run_path("main.py", run_name="__main__")
 
         mock_print.assert_called_once_with(expected_tabulate)
 
-        os.remove(new_file1)
-        os.remove(new_file2)
-
-    def test_run_parser_5(self, monkeypatch):
+    def test_run_parser_5(self, new_home_file1, monkeypatch):
         """
         Run 'python main.py --file home/path/testfile1.log --report average'.
 
         File in home directory, report is 'average'.
         """
-        home_dir = Path().home()
-        log_file_name = 'testfile1.log'
-        new_file = home_dir / log_file_name
-
-        with open(new_file, 'w') as file:
-            for data in TestRunFile.test_request_data:
-                json.dump(data, file)
-                file.write('\n')
-
         # Create endpoint_stats1
         endpoint_stats1 = EndpointStats('/api/context/...')
         endpoint_stats1.total_response_time = 0.044
@@ -505,38 +484,18 @@ class TestRunFile:
         ]
         expected_tabulate = tabulate(expected_tabulate_data, headers=AVERAGE_HEADERS, showindex='always')
 
-        monkeypatch.setattr(sys, 'argv', ['main.py', '--file', str(new_file)])
+        monkeypatch.setattr(sys, 'argv', ['main.py', '--file', new_home_file1])
         with mock.patch('builtins.print') as mock_print:
             runpy.run_path("main.py", run_name="__main__")
 
         mock_print.assert_called_once_with(expected_tabulate)
 
-        os.remove(new_file)
-
-    def test_run_parser_6(self, monkeypatch):
+    def test_run_parser_6(self, new_home_file1, new_local_file2, monkeypatch):
         """
         Run 'python main.py --file home/path/testfile1.log testfile2.log'.
 
         One file in home directory, second file in local directory, default report.
         """
-        home_dir = Path().home()
-        log_file_name1 = 'testfile1.log'
-        new_file1 = home_dir / log_file_name1
-
-        with open(new_file1, 'w') as file:
-            for data in TestRunFile.test_request_data:
-                json.dump(data, file)
-                file.write('\n')
-
-        current_dir = Path(__file__).parent.parent
-        log_file_name2 = 'testfile2.log'
-        new_file2 = current_dir / log_file_name2
-
-        with open(new_file2, 'w') as file:
-            for data in TestRunFile.test_request_data:
-                json.dump(data, file)
-                file.write('\n')
-
         # Create endpoint_stats1
         endpoint_stats1 = EndpointStats('/api/context/...')
         endpoint_stats1.total_response_time = 0.088
@@ -557,14 +516,11 @@ class TestRunFile:
         ]
         expected_tabulate = tabulate(expected_tabulate_data, headers=AVERAGE_HEADERS, showindex='always')
 
-        monkeypatch.setattr(sys, 'argv', ['main.py', '--file', str(new_file1), log_file_name2])
+        monkeypatch.setattr(sys, 'argv', ['main.py', '--file', new_home_file1, new_local_file2])
         with mock.patch('builtins.print') as mock_print:
             runpy.run_path("main.py", run_name="__main__")
 
         mock_print.assert_called_once_with(expected_tabulate)
-
-        os.remove(new_file1)
-        os.remove(new_file2)
 
     def test_run_parser_7(self, monkeypatch):
         """
@@ -576,26 +532,15 @@ class TestRunFile:
         with pytest.raises(FileNotFoundError):
             runpy.run_path("main.py", run_name="__main__")
 
-    def test_run_parser_8(self, monkeypatch):
+    def test_run_parser_8(self, new_local_file1, monkeypatch):
         """
         Run 'python main.py --file testfile1.log not_exist_file.log testfile2.log'.
 
         First file in local directory, second file is not exist, default report.
         """
-        current_dir = Path(__file__).parent.parent
-        log_file_name1 = 'testfile1.log'
-        new_file = current_dir / log_file_name1
-
-        with open(new_file, 'w') as file:
-            for data in TestRunFile.test_request_data:
-                json.dump(data, file)
-                file.write('\n')
-
-        monkeypatch.setattr(sys, 'argv', ['main.py', '--file', log_file_name1, 'not_exist_file.log'])
+        monkeypatch.setattr(sys, 'argv', ['main.py', '--file', new_local_file1, 'not_exist_file.log'])
         with pytest.raises(FileNotFoundError):
             runpy.run_path("main.py", run_name="__main__")
-
-        os.remove(new_file)
 
     def test_run_parser_9(self, monkeypatch):
         """
@@ -604,36 +549,25 @@ class TestRunFile:
         First file in local directory with not json format data, default report.
         """
         current_dir = Path(__file__).parent.parent
-        log_file_name1 = 'testfile1.txt'
-        new_file = current_dir / log_file_name1
-
-        with open(new_file, 'w') as file:
+        log_file_name = 'test_file.txt'
+        new_file = current_dir / log_file_name
+        with open(new_file, 'w') as file:  # Create file with not correct format data.
             file.write('Uncorect data format.')
 
-        monkeypatch.setattr(sys, 'argv', ['main.py', '--file', log_file_name1])
+        monkeypatch.setattr(sys, 'argv', ['main.py', '--file', log_file_name])
         with pytest.raises(json.decoder.JSONDecodeError):
             runpy.run_path("main.py", run_name="__main__")
 
         os.remove(new_file)
 
-    def test_run_parser_10(self, monkeypatch):
+    def test_run_parser_10(self, new_local_file1, monkeypatch):
         """
         Run 'python main.py --file testfile1.txt --report unknown_report'.
 
         First file in local directory, unknown report.
         """
-        current_dir = Path(__file__).parent.parent
-        log_file_name1 = 'testfile1.log'
-        new_file = current_dir / log_file_name1
-
-        with open(new_file, 'w') as file:
-            for data in TestRunFile.test_request_data:
-                json.dump(data, file)
-                file.write('\n')
-
-        monkeypatch.setattr(sys, 'argv', ['main.py', '--file', log_file_name1, '--report', 'unknown_report'])
+        monkeypatch.setattr(sys, 'argv', ['main.py', '--file', new_local_file1, '--report', 'unknown_report'])
         with pytest.raises(SystemExit) as system_exit:
             runpy.run_path("main.py", run_name="__main__")
 
         assert system_exit.value.code == 2
-        os.remove(new_file)
