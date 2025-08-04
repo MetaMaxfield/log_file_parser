@@ -330,197 +330,129 @@ class TestRunFile:
 
         os.remove(new_file)
 
-    def test_run_parser_1(self, new_local_file1, monkeypatch):
+    @pytest.fixture(autouse=False)
+    def expected_table_file1(self):
+        """Expect table for one file (data from TestRunFile.test_request_data)."""
+        # Create endpoint_stats1
+        endpoint_stats1 = EndpointStats('/api/context/...')
+        endpoint_stats1.total_response_time = 0.044
+        endpoint_stats1.total_requests = 2
+        # Create endpoint_stats2
+        endpoint_stats2 = EndpointStats('/api/homeworks/...')
+        endpoint_stats2.total_response_time = 0.024
+        endpoint_stats2.total_requests = 1
+        # Create endpoint_stats3
+        endpoint_stats3 = EndpointStats('/api/specializations/...')
+        endpoint_stats3.total_response_time = 0.04
+        endpoint_stats3.total_requests = 1
+
+        expected_tabulate_data = [
+            endpoint_stats1.get_correct_format_for_tabulate(),
+            endpoint_stats2.get_correct_format_for_tabulate(),
+            endpoint_stats3.get_correct_format_for_tabulate(),
+        ]
+        expected_table = tabulate(expected_tabulate_data, headers=AVERAGE_HEADERS, showindex='always')
+        return expected_table
+
+    @pytest.fixture(autouse=False)
+    def expected_table_file1_file2(self):
+        """
+        Expect table for two files (data from TestRunFile.test_request_data).
+
+        Data values is double because files have a equal data.
+        """
+        # Create endpoint_stats1
+        endpoint_stats1 = EndpointStats('/api/context/...')
+        endpoint_stats1.total_response_time = 0.088
+        endpoint_stats1.total_requests = 4
+        # Create endpoint_stats2
+        endpoint_stats2 = EndpointStats('/api/homeworks/...')
+        endpoint_stats2.total_response_time = 0.048
+        endpoint_stats2.total_requests = 2
+        # Create endpoint_stats3
+        endpoint_stats3 = EndpointStats('/api/specializations/...')
+        endpoint_stats3.total_response_time = 0.08
+        endpoint_stats3.total_requests = 2
+
+        expected_tabulate_data = [
+            endpoint_stats1.get_correct_format_for_tabulate(),
+            endpoint_stats2.get_correct_format_for_tabulate(),
+            endpoint_stats3.get_correct_format_for_tabulate(),
+        ]
+        expected_table = tabulate(expected_tabulate_data, headers=AVERAGE_HEADERS, showindex='always')
+        return expected_table
+
+    def test_run_parser_1(self, new_local_file1, expected_table_file1, monkeypatch):
         """
         Run 'python main.py --file testfile1.log'.
 
         File in local directory, default report (average).
         """
-        # Create endpoint_stats1
-        endpoint_stats1 = EndpointStats('/api/context/...')
-        endpoint_stats1.total_response_time = 0.044
-        endpoint_stats1.total_requests = 2
-        # Create endpoint_stats2
-        endpoint_stats2 = EndpointStats('/api/homeworks/...')
-        endpoint_stats2.total_response_time = 0.024
-        endpoint_stats2.total_requests = 1
-        # Create endpoint_stats3
-        endpoint_stats3 = EndpointStats('/api/specializations/...')
-        endpoint_stats3.total_response_time = 0.04
-        endpoint_stats3.total_requests = 1
-
-        expected_tabulate_data = [
-            endpoint_stats1.get_correct_format_for_tabulate(),
-            endpoint_stats2.get_correct_format_for_tabulate(),
-            endpoint_stats3.get_correct_format_for_tabulate(),
-        ]
-        expected_tabulate = tabulate(expected_tabulate_data, headers=AVERAGE_HEADERS, showindex='always')
-
         monkeypatch.setattr(sys, 'argv', ['main.py', '--file', new_local_file1])
         with mock.patch('builtins.print') as mock_print:
             runpy.run_path("main.py", run_name="__main__")
 
-        mock_print.assert_called_once_with(expected_tabulate)
+        mock_print.assert_called_once_with(expected_table_file1)
 
-    def test_run_parser_2(self, new_local_file1, monkeypatch):
+    def test_run_parser_2(self, new_local_file1, expected_table_file1, monkeypatch):
         """
         Run 'python main.py --file testfile1.log --report average'.
 
         File in local directory, report is 'average'.
         """
-        # Create endpoint_stats1
-        endpoint_stats1 = EndpointStats('/api/context/...')
-        endpoint_stats1.total_response_time = 0.044
-        endpoint_stats1.total_requests = 2
-        # Create endpoint_stats2
-        endpoint_stats2 = EndpointStats('/api/homeworks/...')
-        endpoint_stats2.total_response_time = 0.024
-        endpoint_stats2.total_requests = 1
-        # Create endpoint_stats3
-        endpoint_stats3 = EndpointStats('/api/specializations/...')
-        endpoint_stats3.total_response_time = 0.04
-        endpoint_stats3.total_requests = 1
-
-        expected_tabulate_data = [
-            endpoint_stats1.get_correct_format_for_tabulate(),
-            endpoint_stats2.get_correct_format_for_tabulate(),
-            endpoint_stats3.get_correct_format_for_tabulate(),
-        ]
-        expected_tabulate = tabulate(expected_tabulate_data, headers=AVERAGE_HEADERS, showindex='always')
-
         monkeypatch.setattr(sys, 'argv', ['main.py', '--file', new_local_file1])
         with mock.patch('builtins.print') as mock_print:
             runpy.run_path("main.py", run_name="__main__")
 
-        mock_print.assert_called_once_with(expected_tabulate)
+        mock_print.assert_called_once_with(expected_table_file1)
 
-    def test_run_parser_3(self, new_local_file1, new_local_file2, monkeypatch):
+    def test_run_parser_3(self, new_local_file1, new_local_file2, expected_table_file1_file2, monkeypatch):
         """
         Run 'python main.py --file testfile1.log testfile2.log'.
 
         Two files in local directory, default report.
         """
-        # Create endpoint_stats1
-        endpoint_stats1 = EndpointStats('/api/context/...')
-        endpoint_stats1.total_response_time = 0.088
-        endpoint_stats1.total_requests = 4
-        # Create endpoint_stats2
-        endpoint_stats2 = EndpointStats('/api/homeworks/...')
-        endpoint_stats2.total_response_time = 0.048
-        endpoint_stats2.total_requests = 2
-        # Create endpoint_stats3
-        endpoint_stats3 = EndpointStats('/api/specializations/...')
-        endpoint_stats3.total_response_time = 0.08
-        endpoint_stats3.total_requests = 2
-
-        expected_tabulate_data = [
-            endpoint_stats1.get_correct_format_for_tabulate(),
-            endpoint_stats2.get_correct_format_for_tabulate(),
-            endpoint_stats3.get_correct_format_for_tabulate(),
-        ]
-        expected_tabulate = tabulate(expected_tabulate_data, headers=AVERAGE_HEADERS, showindex='always')
-
         monkeypatch.setattr(sys, 'argv', ['main.py', '--file', new_local_file1, new_local_file2])
         with mock.patch('builtins.print') as mock_print:
             runpy.run_path("main.py", run_name="__main__")
 
-        mock_print.assert_called_once_with(expected_tabulate)
+        mock_print.assert_called_once_with(expected_table_file1_file2)
 
-    def test_run_parser_4(self, new_local_file1, new_local_file2, monkeypatch):
+    def test_run_parser_4(self, new_local_file1, new_local_file2, expected_table_file1_file2, monkeypatch):
         """
         Run 'python main.py --file testfile1.log testfile2.log --report average'.
 
         Two files in local directory, report is 'average'.
         """
-        # Create endpoint_stats1
-        endpoint_stats1 = EndpointStats('/api/context/...')
-        endpoint_stats1.total_response_time = 0.088
-        endpoint_stats1.total_requests = 4
-        # Create endpoint_stats2
-        endpoint_stats2 = EndpointStats('/api/homeworks/...')
-        endpoint_stats2.total_response_time = 0.048
-        endpoint_stats2.total_requests = 2
-        # Create endpoint_stats3
-        endpoint_stats3 = EndpointStats('/api/specializations/...')
-        endpoint_stats3.total_response_time = 0.08
-        endpoint_stats3.total_requests = 2
-
-        expected_tabulate_data = [
-            endpoint_stats1.get_correct_format_for_tabulate(),
-            endpoint_stats2.get_correct_format_for_tabulate(),
-            endpoint_stats3.get_correct_format_for_tabulate(),
-        ]
-        expected_tabulate = tabulate(expected_tabulate_data, headers=AVERAGE_HEADERS, showindex='always')
-
         monkeypatch.setattr(sys, 'argv', ['main.py', '--file', new_local_file1, new_local_file2])
         with mock.patch('builtins.print') as mock_print:
             runpy.run_path("main.py", run_name="__main__")
 
-        mock_print.assert_called_once_with(expected_tabulate)
+        mock_print.assert_called_once_with(expected_table_file1_file2)
 
-    def test_run_parser_5(self, new_home_file1, monkeypatch):
+    def test_run_parser_5(self, new_home_file1, expected_table_file1, monkeypatch):
         """
         Run 'python main.py --file home/path/testfile1.log --report average'.
 
         File in home directory, report is 'average'.
         """
-        # Create endpoint_stats1
-        endpoint_stats1 = EndpointStats('/api/context/...')
-        endpoint_stats1.total_response_time = 0.044
-        endpoint_stats1.total_requests = 2
-        # Create endpoint_stats2
-        endpoint_stats2 = EndpointStats('/api/homeworks/...')
-        endpoint_stats2.total_response_time = 0.024
-        endpoint_stats2.total_requests = 1
-        # Create endpoint_stats3
-        endpoint_stats3 = EndpointStats('/api/specializations/...')
-        endpoint_stats3.total_response_time = 0.04
-        endpoint_stats3.total_requests = 1
-
-        expected_tabulate_data = [
-            endpoint_stats1.get_correct_format_for_tabulate(),
-            endpoint_stats2.get_correct_format_for_tabulate(),
-            endpoint_stats3.get_correct_format_for_tabulate(),
-        ]
-        expected_tabulate = tabulate(expected_tabulate_data, headers=AVERAGE_HEADERS, showindex='always')
-
         monkeypatch.setattr(sys, 'argv', ['main.py', '--file', new_home_file1])
         with mock.patch('builtins.print') as mock_print:
             runpy.run_path("main.py", run_name="__main__")
 
-        mock_print.assert_called_once_with(expected_tabulate)
+        mock_print.assert_called_once_with(expected_table_file1)
 
-    def test_run_parser_6(self, new_home_file1, new_local_file2, monkeypatch):
+    def test_run_parser_6(self, new_home_file1, new_local_file2, expected_table_file1_file2, monkeypatch):
         """
         Run 'python main.py --file home/path/testfile1.log testfile2.log'.
 
         One file in home directory, second file in local directory, default report.
         """
-        # Create endpoint_stats1
-        endpoint_stats1 = EndpointStats('/api/context/...')
-        endpoint_stats1.total_response_time = 0.088
-        endpoint_stats1.total_requests = 4
-        # Create endpoint_stats2
-        endpoint_stats2 = EndpointStats('/api/homeworks/...')
-        endpoint_stats2.total_response_time = 0.048
-        endpoint_stats2.total_requests = 2
-        # Create endpoint_stats3
-        endpoint_stats3 = EndpointStats('/api/specializations/...')
-        endpoint_stats3.total_response_time = 0.08
-        endpoint_stats3.total_requests = 2
-
-        expected_tabulate_data = [
-            endpoint_stats1.get_correct_format_for_tabulate(),
-            endpoint_stats2.get_correct_format_for_tabulate(),
-            endpoint_stats3.get_correct_format_for_tabulate(),
-        ]
-        expected_tabulate = tabulate(expected_tabulate_data, headers=AVERAGE_HEADERS, showindex='always')
-
         monkeypatch.setattr(sys, 'argv', ['main.py', '--file', new_home_file1, new_local_file2])
         with mock.patch('builtins.print') as mock_print:
             runpy.run_path("main.py", run_name="__main__")
 
-        mock_print.assert_called_once_with(expected_tabulate)
+        mock_print.assert_called_once_with(expected_table_file1_file2)
 
     def test_run_parser_7(self, monkeypatch):
         """
