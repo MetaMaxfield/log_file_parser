@@ -292,7 +292,7 @@ class TestRunFile:
 
         File in local directory, default report (average).
         """
-        current_dir = Path(__file__).parent
+        current_dir = Path(__file__).parent.parent
         log_file_name1 = 'testfile1.log'
         new_file = current_dir / log_file_name1
         with open(new_file, 'w') as file:
@@ -334,7 +334,7 @@ class TestRunFile:
 
         File in local directory, report is 'average'.
         """
-        current_dir = Path(__file__).parent
+        current_dir = Path(__file__).parent.parent
         log_file_name1 = 'testfile1.log'
         new_file = current_dir / log_file_name1
         with open(new_file, 'w') as file:
@@ -376,7 +376,7 @@ class TestRunFile:
 
         Two files in local directory, default report.
         """
-        current_dir = Path(__file__).parent
+        current_dir = Path(__file__).parent.parent
         log_file_name1 = 'testfile1.log'
         new_file1 = current_dir / log_file_name1
         with open(new_file1, 'w') as file:
@@ -426,7 +426,7 @@ class TestRunFile:
 
         Two files in local directory, report is 'average'.
         """
-        current_dir = Path(__file__).parent
+        current_dir = Path(__file__).parent.parent
         log_file_name1 = 'testfile1.log'
         new_file1 = current_dir / log_file_name1
         with open(new_file1, 'w') as file:
@@ -528,7 +528,7 @@ class TestRunFile:
                 json.dump(data, file)
                 file.write('\n')
 
-        current_dir = Path(__file__).parent
+        current_dir = Path(__file__).parent.parent
         log_file_name2 = 'testfile2.log'
         new_file2 = current_dir / log_file_name2
 
@@ -582,7 +582,7 @@ class TestRunFile:
 
         First file in local directory, second file is not exist, default report.
         """
-        current_dir = Path(__file__).parent
+        current_dir = Path(__file__).parent.parent
         log_file_name1 = 'testfile1.log'
         new_file = current_dir / log_file_name1
 
@@ -603,7 +603,7 @@ class TestRunFile:
 
         First file in local directory with not json format data, default report.
         """
-        current_dir = Path(__file__).parent
+        current_dir = Path(__file__).parent.parent
         log_file_name1 = 'testfile1.txt'
         new_file = current_dir / log_file_name1
 
@@ -622,7 +622,7 @@ class TestRunFile:
 
         First file in local directory, unknown report.
         """
-        current_dir = Path(__file__).parent
+        current_dir = Path(__file__).parent.parent
         log_file_name1 = 'testfile1.log'
         new_file = current_dir / log_file_name1
 
