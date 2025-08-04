@@ -2,6 +2,8 @@
 
 import argparse
 import json
+from io import TextIOWrapper
+from typing import Any
 
 from tabulate import tabulate
 
@@ -31,7 +33,7 @@ def get_command_line_options() -> argparse.Namespace:
     return args
 
 
-def accounting_endpoint_request(request_data):
+def accounting_endpoint_request(request_data: dict[str, Any]) -> None:
     """
     Add/create endpoint info in ALL_ENDPOINT_REQUESTS.
 
@@ -47,7 +49,7 @@ def accounting_endpoint_request(request_data):
     ALL_ENDPOINT_REQUESTS[request_data['url']].add_response_time(request_data['response_time'])
 
 
-def parsing_file(opened_file):
+def parsing_file(opened_file: TextIOWrapper) -> None:
     """Extract data."""
     line = opened_file.readline()
     while line != '':
@@ -56,26 +58,26 @@ def parsing_file(opened_file):
         line = opened_file.readline()
 
 
-def read_files(files):
+def read_files(files: list[str]) -> None:
     """Open all files one by one."""
     for file in files:
         with open(file, 'r') as opened_file:
             parsing_file(opened_file)
 
 
-def generate_average_format_for_table():
+def generate_average_format_for_table() -> list[list[str | int | float]]:
     """
-    Generate data format: [(...), (...)].
+    Generate data format: [[...], [...]].
 
     Determine subsequence in AVERAGE_HEADERS.
     Order by '-total'.
     """
     table_data = [value.get_correct_format_for_tabulate() for value in ALL_ENDPOINT_REQUESTS.values()]
-    table_data.sort(key=lambda x: 1 / x[AVERAGE_HEADERS.index(REQUESTS_TOTAL_COLUMN_NAME)])
+    table_data.sort(key=lambda x: 1 / int(x[AVERAGE_HEADERS.index(REQUESTS_TOTAL_COLUMN_NAME)]))  # int() for mypy.
     return table_data
 
 
-def create_table(type_report):
+def create_table(type_report: str) -> str:
     """Create table object according to the given '--report'."""
     if type_report == AVERAGE_REPORT_NAME:
         table_data = generate_average_format_for_table()
@@ -85,7 +87,7 @@ def create_table(type_report):
     return table
 
 
-def main():
+def main() -> None:
     """Execute the script step by step."""
     args = get_command_line_options()
     read_files(args.file)
