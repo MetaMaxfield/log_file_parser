@@ -8,7 +8,7 @@ nodeenv==1.9.1
 packaging==25.0
 platformdirs==4.3.8
 pluggy==1.6.0
-pre_commit==4.2.0
+pre_commit==4.2.0  # Install 'black', 'isort', 'flake8', 'mypy' from repos specified in .pre-commit-config.yaml.
 Pygments==2.19.2
 pytest==8.4.1
 pytest-cov==6.2.1
